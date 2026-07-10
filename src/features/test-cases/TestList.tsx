@@ -26,7 +26,11 @@ export interface Test {
   difficulty?: string;
 }
 
-import { getDifficultyColor, formatType, getStatusStyle } from "../../utils/helper";
+import {
+  getDifficultyColor,
+  formatType,
+  getStatusStyle,
+} from "../../utils/helper";
 
 interface TestListProps {
   tests: Test[];
@@ -44,7 +48,7 @@ const TestList = ({
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9);
+  const [pageSize, setPageSize] = useState(12);
 
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

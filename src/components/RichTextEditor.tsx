@@ -153,7 +153,7 @@ const RichTextEditor = ({
     const contentStateWithEntity = contentState.createEntity(
       "IMAGE",
       "IMMUTABLE",
-      { src: base64, alt: "Uploaded image", height: "auto", width: "auto" },
+      { src: base64, alt: "Uploaded image", height: "auto", width: "auto", alignment: "left" },
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(currentState, {
