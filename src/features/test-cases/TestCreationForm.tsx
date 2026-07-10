@@ -238,6 +238,16 @@ const TestCreationForm = ({
     }
   }, [testId, testData, subjects, isPrefilled]);
 
+  // Auto-calculate total marks: questions × correct marks
+  useEffect(() => {
+    const q = parseInt(noOfQuestions);
+    if (!isNaN(q) && q > 0) {
+      setTotalMarks((q * correctAnswer).toString());
+    } else {
+      setTotalMarks("");
+    }
+  }, [noOfQuestions, correctAnswer]);
+
   // Resolve topic and subtopic names to UUIDs once the metadata list loads
   useEffect(() => {
     if (!testId || !testData) return;
@@ -758,20 +768,17 @@ const TestCreationForm = ({
             )}
           </div>
 
-          {/* Total Marks */}
+          {/* Total Marks (auto-calculated) */}
           <div className="space-y-2 col-span-1">
             <label className="block text-xs font-semibold text-gray-500">
               Total Marks
             </label>
             <input
               type="text"
-              placeholder="Ex:250 Marks"
+              placeholder="0"
               value={totalMarks}
-              onChange={(e) => {
-                setTotalMarks(e.target.value);
-                setValidationErrors((prev) => ({ ...prev, totalMarks: "" }));
-              }}
-              className={`w-full text-sm px-4 rounded-xl border focus:outline-none focus:ring-1 focus:ring-[#1f59da] placeholder-gray-300 h-[48px] ${
+              readOnly
+              className={`w-full text-sm px-4 rounded-xl border h-[48px] bg-[#f8faff] text-gray-700 cursor-default select-none ${
                 validationErrors.totalMarks
                   ? "border-red-500 bg-red-50/10"
                   : "border-gray-200"

@@ -47,9 +47,7 @@ const SingleSelectDropdown = ({
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {selectedOption ? (
-          <span className="text-gray-800 font-semibold">
-            {selectedOption.name}
-          </span>
+          <span className="text-gray-800">{selectedOption.name}</span>
         ) : (
           <span className="text-gray-400">{placeholder}</span>
         )}
