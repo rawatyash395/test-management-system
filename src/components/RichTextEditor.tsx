@@ -17,7 +17,7 @@ interface RichTextEditorProps {
 }
 
 // Custom image upload button rendered in the toolbar
-const ImageUploadButton = ({ onChange: _onChange, editorState, ...rest }: any) => {
+const ImageUploadButton = ({ onChange: _onChange, ...rest }: any) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -102,7 +102,7 @@ const RichTextEditor = ({
         const { contentBlocks, entityMap } = blocksFromHtml;
         const contentState = ContentState.createFromBlockArray(
           contentBlocks,
-          entityMap
+          entityMap,
         );
         return EditorState.createWithContent(contentState);
       }
@@ -125,7 +125,7 @@ const RichTextEditor = ({
         const { contentBlocks, entityMap } = blocksFromHtml;
         const contentState = ContentState.createFromBlockArray(
           contentBlocks,
-          entityMap
+          entityMap,
         );
         setEditorState(EditorState.createWithContent(contentState));
       }
@@ -145,38 +145,33 @@ const RichTextEditor = ({
   };
 
   // Inserts a base64 image directly into the draft-js content
-  const handleImageUpload = useCallback(
-    (base64: string) => {
-      const currentState = editorStateRef.current;
-      if (!currentState) return;
+  const handleImageUpload = useCallback((base64: string) => {
+    const currentState = editorStateRef.current;
+    if (!currentState) return;
 
-      const contentState = currentState.getCurrentContent();
-      const contentStateWithEntity = contentState.createEntity(
-        "IMAGE",
-        "IMMUTABLE",
-        { src: base64, alt: "Uploaded image", height: "auto", width: "auto" }
-      );
-      const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-      const newEditorState = EditorState.set(currentState, {
-        currentContent: contentStateWithEntity,
-      });
-      const nextState = AtomicBlockUtils.insertAtomicBlock(
-        newEditorState,
-        entityKey,
-        " "
-      );
-      setEditorState(nextState);
+    const contentState = currentState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      "IMAGE",
+      "IMMUTABLE",
+      { src: base64, alt: "Uploaded image", height: "auto", width: "auto" },
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const newEditorState = EditorState.set(currentState, {
+      currentContent: contentStateWithEntity,
+    });
+    const nextState = AtomicBlockUtils.insertAtomicBlock(
+      newEditorState,
+      entityKey,
+      " ",
+    );
+    setEditorState(nextState);
 
-      // Emit updated HTML
-      const rawContentState = convertToRaw(
-        nextState.getCurrentContent()
-      );
-      const html = draftToHtml(rawContentState);
-      lastHtmlRef.current = html;
-      onChangeRef.current(html);
-    },
-    []
-  );
+    // Emit updated HTML
+    const rawContentState = convertToRaw(nextState.getCurrentContent());
+    const html = draftToHtml(rawContentState);
+    lastHtmlRef.current = html;
+    onChangeRef.current(html);
+  }, []);
 
   return (
     <div className="rich-text-editor border border-gray-200 rounded-xl overflow-hidden bg-white relative">
@@ -196,7 +191,10 @@ const RichTextEditor = ({
           },
         }}
         toolbarCustomButtons={[
-          <ImageUploadButton onImageUpload={handleImageUpload} />,
+          <ImageUploadButton
+            key="editorState"
+            onImageUpload={handleImageUpload}
+          />,
         ]}
       />
     </div>

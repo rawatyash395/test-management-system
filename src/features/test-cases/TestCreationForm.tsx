@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { showNotification, isUuid } from "../../utils/helper";
 import {
   useSubjects,
@@ -698,27 +698,12 @@ const TestCreationForm = ({
             <label className="block text-xs font-semibold text-gray-500">
               Wrong Answer
             </label>
-            <div className="flex items-center justify-between px-4 rounded-xl border border-gray-200 bg-white h-12">
-              <span className="text-sm font-semibold text-gray-850">
-                {wrongAnswer > 0 ? `+${wrongAnswer}` : wrongAnswer}
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setWrongAnswer((w) => w + 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setWrongAnswer((w) => w - 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
+            <input
+              type="number"
+              value={wrongAnswer}
+              onChange={(e) => setWrongAnswer(Number(e.target.value))}
+              className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-white text-sm text-gray-850 focus:outline-none focus:ring-1 focus:ring-[#1f59da]"
+            />
           </div>
 
           {/* Unattempted */}
@@ -726,27 +711,12 @@ const TestCreationForm = ({
             <label className="block text-xs font-semibold text-gray-500">
               Unattempted
             </label>
-            <div className="flex items-center justify-between px-4 rounded-xl border border-gray-200 bg-white h-12">
-              <span className="text-sm font-semibold text-gray-850">
-                {unattempted >= 0 ? `+${unattempted}` : unattempted}
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setUnattempted((u) => u + 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUnattempted((u) => u - 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
+            <input
+              type="number"
+              value={unattempted}
+              onChange={(e) => setUnattempted(Number(e.target.value))}
+              className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-white text-sm text-gray-850 focus:outline-none focus:ring-1 focus:ring-[#1f59da]"
+            />
           </div>
 
           {/* Correct Answer */}
@@ -754,27 +724,12 @@ const TestCreationForm = ({
             <label className="block text-xs font-semibold text-gray-500">
               Correct Answer
             </label>
-            <div className="flex items-center justify-between px-4 rounded-xl border border-gray-200 bg-white h-12">
-              <span className="text-sm font-semibold text-gray-850">
-                {correctAnswer >= 0 ? `+${correctAnswer}` : correctAnswer}
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setCorrectAnswer((c) => c + 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCorrectAnswer((c) => c - 1)}
-                  className="p-0.5 hover:text-gray-800 text-gray-400 cursor-pointer"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
+            <input
+              type="number"
+              value={correctAnswer}
+              onChange={(e) => setCorrectAnswer(Number(e.target.value))}
+              className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-white text-sm text-gray-850 focus:outline-none focus:ring-1 focus:ring-[#1f59da]"
+            />
           </div>
 
           {/* No of Questions */}
