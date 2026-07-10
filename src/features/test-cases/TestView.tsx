@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../../components/MainLayout";
+import { Pill } from "../../components/Pill";
 import {
   useGetTest,
   useSubjects,
@@ -16,6 +17,12 @@ import {
   Pen,
 } from "lucide-react";
 import type { ApiQuestion } from "../../hooks/apiHooks";
+import {
+  isUuid,
+  getDifficultyColor,
+  formatType,
+  getStatusStyle,
+} from "../../utils/helper";
 
 const TestView = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,9 +32,6 @@ const TestView = () => {
 
   // Dynamic Metadata Fetching for Subject & Topics display mappings
   const { data: subjects = [] } = useSubjects();
-
-  const isUuid = (val: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
   const subjectId = testData?.subject
     ? subjects.find(
@@ -63,7 +67,7 @@ const TestView = () => {
   if (isLoading || (questionIds.length > 0 && isBulkLoading)) {
     return (
       <MainLayout>
-        <div className="max-w-5xl mx-auto space-y-6 p-4 animate-pulse">
+        <div className="space-y-6 p-4 animate-pulse">
           <div className="flex items-center justify-between">
             <div className="h-9 w-32 bg-gray-200 rounded-lg"></div>
             <div className="h-9 w-36 bg-gray-200 rounded-lg"></div>
@@ -130,30 +134,6 @@ const TestView = () => {
           subTopicsList.find((st) => st.id === stId)?.name || stId,
       )
       .join(", ") || "Application";
-
-  const getDifficultyColor = (difficulty?: string) => {
-    const diff = difficulty?.toLowerCase();
-    if (diff === "medium") return "bg-amber-500 text-white";
-    if (diff === "difficult" || diff === "hard")
-      return "bg-rose-500 text-white";
-    return "bg-[#2dd4bf] text-white"; // default/easy
-  };
-
-  const formatType = (type?: string) => {
-    if (!type) return "Chapter Wise";
-    if (type === "chapterwise") return "Chapter Wise";
-    if (type === "subjectwise") return "Subject Wise";
-    if (type === "full") return "Full Test";
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
-
-  const getStatusStyle = (status: string | null) => {
-    const s = status?.toLowerCase();
-    if (s === "active" || s === "live")
-      return "bg-emerald-50 text-emerald-700 border-emerald-100";
-    if (s === "completed") return "bg-blue-50 text-blue-700 border-blue-100";
-    return "bg-amber-50 text-amber-700 border-amber-100"; // draft
-  };
 
   return (
     <MainLayout>
@@ -228,14 +208,11 @@ const TestView = () => {
                 <span className="text-gray-300 mr-2">:</span>
                 <div className="flex flex-wrap gap-1">
                   {topicsDisplayName ? (
-                    topicsDisplayName.split(",").map((t) => (
-                      <span
-                        key={t}
-                        className="bg-white text-[#fbbf24] border border-[#facc15] px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize"
-                      >
-                        {t.trim()}
-                      </span>
-                    ))
+                    topicsDisplayName
+                      .split(",")
+                      .map((t) => (
+                        <Pill key={t} text={t.trim()} variant="yellow" />
+                      ))
                   ) : (
                     <span className="text-gray-400">None</span>
                   )}
@@ -244,9 +221,7 @@ const TestView = () => {
               <div className="flex items-center">
                 <span className="text-gray-400 w-24">Sub Topic</span>
                 <span className="text-gray-300 mr-2">:</span>
-                <span className="bg-white text-[#fbbf24] border border-[#facc15] px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize">
-                  {subTopicsDisplayName}
-                </span>
+                <Pill text={subTopicsDisplayName} variant="yellow" />
               </div>
             </div>
             <div className="space-y-2">
@@ -297,7 +272,7 @@ const TestView = () => {
                         Q{idx + 1}
                       </span>
                       <div
-                        className="prose prose-sm max-w-none text-gray-850"
+                        className="prose prose-sm max-w-none text-gray-850 question-html"
                         dangerouslySetInnerHTML={{ __html: q.question }}
                       />
                     </div>
@@ -345,6 +320,7 @@ const TestView = () => {
                         Explanation:
                       </span>
                       <div
+                        className="question-html"
                         dangerouslySetInnerHTML={{ __html: q.explanation }}
                       />
                     </div>

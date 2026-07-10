@@ -26,6 +26,8 @@ export interface Test {
   difficulty?: string;
 }
 
+import { getDifficultyColor, formatType, getStatusStyle } from "../../utils/helper";
+
 interface TestListProps {
   tests: Test[];
   onDelete: (id: string) => void;
@@ -43,22 +45,6 @@ const TestList = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
-
-  const getDifficultyColor = (difficulty?: string) => {
-    const diff = difficulty?.toLowerCase();
-    if (diff === "medium") return "bg-amber-500 text-white";
-    if (diff === "difficult" || diff === "hard")
-      return "bg-rose-500 text-white";
-    return "bg-[#2dd4bf] text-white"; // default/easy
-  };
-
-  const formatType = (type?: string) => {
-    if (!type) return "Chapter Wise";
-    if (type === "chapterwise") return "Chapter Wise";
-    if (type === "subjectwise") return "Subject Wise";
-    if (type === "full") return "Full Test";
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
 
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -139,19 +125,6 @@ const TestList = ({
   // Open View Modal
   const openViewModal = (test: Test) => {
     navigate(`/tests/view/${test.id}`);
-  };
-
-  const getStatusStyle = (status: Test["status"]) => {
-    switch (status) {
-      case "Active":
-        return "bg-emerald-50 text-emerald-700 border-emerald-100";
-      case "Draft":
-        return "bg-amber-50 text-amber-700 border-amber-100";
-      case "Completed":
-        return "bg-blue-50 text-blue-700 border-blue-100";
-      case "Live":
-        return "bg-emerald-50 text-emerald-700 border-emerald-100";
-    }
   };
 
   return (

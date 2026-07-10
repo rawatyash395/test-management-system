@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { showNotification } from "../../utils/helper";
+import { showNotification, isUuid } from "../../utils/helper";
 import {
   useSubjects,
   useTopics,
@@ -241,10 +241,6 @@ const TestCreationForm = ({
   // Resolve topic and subtopic names to UUIDs once the metadata list loads
   useEffect(() => {
     if (!testId || !testData) return;
-    const isUuid = (val: string) =>
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        val,
-      );
 
     if (topics.length > 0) {
       setSelectedTopicIds((prev) =>

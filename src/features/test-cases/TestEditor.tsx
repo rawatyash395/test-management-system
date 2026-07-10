@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import MainLayout from "../../components/MainLayout";
-import { showNotification } from "../../utils/helper";
+import {
+  showNotification,
+  isUuid,
+  getDifficultyColor,
+  formatType,
+} from "../../utils/helper";
 import RichTextEditor from "../../components/RichTextEditor";
 import testSticker from "../../assets/test-sticker.svg";
 import {
@@ -153,9 +158,6 @@ const TestEditor = ({
   // Dynamic Metadata Fetching for Subject & Topics display mappings
   const { data: subjects = [] } = useSubjects();
 
-  const isUuid = (val: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
-
   // Find subject UUID if testDetails.subject is a subject name (like "Sociology")
   const subjectId = testDetails.subject
     ? subjects.find(
@@ -202,22 +204,6 @@ const TestEditor = ({
     .join(", ");
 
   const totalQuestions = questions.length;
-
-  const getDifficultyColor = (difficulty?: string) => {
-    const diff = difficulty?.toLowerCase();
-    if (diff === "medium") return "bg-amber-500 text-white";
-    if (diff === "difficult" || diff === "hard")
-      return "bg-rose-500 text-white";
-    return "bg-[#2dd4bf] text-white"; // default/easy
-  };
-
-  const formatType = (type?: string) => {
-    if (!type) return "Chapter Wise";
-    if (type === "chapterwise") return "Chapter Wise";
-    if (type === "subjectwise") return "Subject Wise";
-    if (type === "full") return "Full Test";
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
 
   const queryClient = useQueryClient();
   const bulkCreateQuestions = useBulkCreateQuestions();
@@ -356,6 +342,200 @@ const TestEditor = ({
     });
   };
 
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const parseCSV = (csvText: string) => {
+        const lines: string[][] = [];
+        let row: string[] = [];
+        let inQuotes = false;
+        let currentValue = "";
+
+        for (let i = 0; i < csvText.length; i++) {
+          const char = csvText[i];
+          const nextChar = csvText[i + 1];
+
+          if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+              currentValue += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === "," && !inQuotes) {
+            row.push(currentValue.trim());
+            currentValue = "";
+          } else if ((char === "\r" || char === "\n") && !inQuotes) {
+            if (char === "\r" && nextChar === "\n") {
+              i++;
+            }
+            row.push(currentValue.trim());
+            if (row.length > 1 || row[0] !== "") {
+              lines.push(row);
+            }
+            row = [];
+            currentValue = "";
+          } else {
+            currentValue += char;
+          }
+        }
+        if (currentValue !== "" || row.length > 0) {
+          row.push(currentValue.trim());
+          lines.push(row);
+        }
+        return lines;
+      };
+
+      try {
+        const parsed = parseCSV(text);
+        if (parsed.length <= 1) {
+          showNotification("CSV file is empty or invalid.", "error");
+          return;
+        }
+
+        let startIndex = 0;
+        const firstRow = parsed[0].map((c) => c.toLowerCase());
+        const hasHeader = firstRow.some(
+          (cell) =>
+            cell.includes("question") ||
+            cell.includes("option") ||
+            cell.includes("correct") ||
+            cell.includes("explanation") ||
+            cell.includes("difficulty"),
+        );
+        if (hasHeader) {
+          startIndex = 1;
+        }
+
+        const newQuestions: QuestionItem[] = [];
+        for (let i = startIndex; i < parsed.length; i++) {
+          const row = parsed[i];
+          if (row.length < 5) continue;
+
+          const questionText = row[0] || "";
+          const opt1 = row[1] || "";
+          const opt2 = row[2] || "";
+          const opt3 = row[3] || "";
+          const opt4 = row[4] || "";
+
+          let correctIdx: number | null = null;
+          const correctVal = row[5] || "";
+          if (correctVal) {
+            const parsedIdx = parseInt(correctVal, 10);
+            if (!isNaN(parsedIdx)) {
+              if (parsedIdx >= 1 && parsedIdx <= 4) {
+                correctIdx = parsedIdx - 1;
+              } else if (parsedIdx >= 0 && parsedIdx <= 3) {
+                correctIdx = parsedIdx;
+              }
+            } else {
+              const lowerCorrect = correctVal.toLowerCase();
+              if (
+                lowerCorrect.includes("option1") ||
+                lowerCorrect === "1" ||
+                lowerCorrect === "a"
+              )
+                correctIdx = 0;
+              else if (
+                lowerCorrect.includes("option2") ||
+                lowerCorrect === "2" ||
+                lowerCorrect === "b"
+              )
+                correctIdx = 1;
+              else if (
+                lowerCorrect.includes("option3") ||
+                lowerCorrect === "3" ||
+                lowerCorrect === "c"
+              )
+                correctIdx = 2;
+              else if (
+                lowerCorrect.includes("option4") ||
+                lowerCorrect === "4" ||
+                lowerCorrect === "d"
+              )
+                correctIdx = 3;
+            }
+          }
+
+          const solution = row[6] || "";
+          const difficulty = row[7] || "Easy";
+          const topic = row[8] || testDetails.topic || "";
+          const subtopic = row[9] || testDetails.subTopic || "";
+
+          let formattedDifficulty = "Easy";
+          if (difficulty.toLowerCase() === "medium")
+            formattedDifficulty = "Medium";
+          if (
+            difficulty.toLowerCase() === "difficult" ||
+            difficulty.toLowerCase() === "hard"
+          )
+            formattedDifficulty = "Difficult";
+
+          newQuestions.push({
+            id: Date.now() + i,
+            text: questionText,
+            options: [opt1, opt2, opt3, opt4],
+            correctOptionIdx: correctIdx,
+            solution: solution,
+            difficulty: formattedDifficulty,
+            topic: topic,
+            subtopic: subtopic,
+            isCompleted:
+              questionText.trim().length > 0 &&
+              opt1.trim().length > 0 &&
+              opt2.trim().length > 0 &&
+              correctIdx !== null,
+          });
+        }
+
+        if (newQuestions.length === 0) {
+          showNotification("No valid questions found in CSV.", "error");
+          return;
+        }
+
+        setQuestions((prev) => {
+          const updated = [...prev];
+          for (let i = 0; i < newQuestions.length; i++) {
+            const newQ = newQuestions[i];
+            if (i < updated.length) {
+              updated[i] = {
+                ...updated[i],
+                text: newQ.text,
+                options: newQ.options,
+                correctOptionIdx: newQ.correctOptionIdx,
+                solution: newQ.solution,
+                difficulty: newQ.difficulty,
+                topic: newQ.topic || updated[i].topic,
+                subtopic: newQ.subtopic || updated[i].subtopic,
+                isCompleted: newQ.isCompleted,
+                media_url: newQ.media_url || updated[i].media_url,
+              };
+            } else {
+              updated.push(newQ);
+            }
+          }
+          return updated;
+        });
+        setActiveIdx(0);
+        showNotification(
+          `Successfully imported ${newQuestions.length} questions from CSV!`,
+          "success",
+        );
+      } catch (err) {
+        console.error("CSV Parse Error", err);
+        showNotification("Failed to parse CSV file.", "error");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   const handleNext = () => {
     if (activeIdx < totalQuestions - 1) {
       setActiveIdx((prev) => prev + 1);
@@ -431,7 +611,7 @@ const TestEditor = ({
                         <Check className="h-3 w-3" strokeWidth={3} />
                       )}
                     </div>
-                    <span className="truncate">Question {q.id}</span>
+                    <span className="truncate">Question {idx + 1}</span>
                   </button>
 
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -561,7 +741,7 @@ const TestEditor = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-base font-bold text-text-heading">
-                      Question {currentQuestion.id}
+                      Question {activeIdx + 1}
                     </span>
                     <span className="text-xs font-bold text-gray-300 ml-1">
                       /{totalQuestions}
@@ -592,10 +772,16 @@ const TestEditor = ({
                       <Plus className="h-3.5 w-3.5" />
                       MCQ
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 cursor-pointer">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 cursor-pointer">
                       <RefreshCw className="h-3.5 w-3.5" />
                       CSV
-                    </button>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        onChange={handleCSVUpload}
+                      />
+                    </label>
                   </div>
                 </div>
 
@@ -694,22 +880,6 @@ const TestEditor = ({
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                </div>
-
-                {/* Media URL Block */}
-                <div className="space-y-3">
-                  <span className="block text-sm font-semibold text-gray-700">
-                    Media URL
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Enter Media URL here (image or video link)"
-                    value={currentQuestion.media_url || ""}
-                    onChange={(e) =>
-                      updateCurrentQuestion({ media_url: e.target.value })
-                    }
-                    className="w-full text-sm px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1f59da] placeholder-gray-300"
-                  />
                 </div>
 
                 {/* Question Settings dropdowns */}
@@ -860,7 +1030,7 @@ const TestEditor = ({
                   </div>
 
                   {/* Radio selection grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 gap-y-8">
                     {[
                       "Always Available",
                       "3 Weeks",

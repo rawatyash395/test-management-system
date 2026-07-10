@@ -341,9 +341,11 @@ const TestEditorWrapper = () => {
     };
   });
 
-  if (mappedQuestions.length === 0) {
+  const totalQuestionsLimit = testData.total_questions || 1;
+  while (mappedQuestions.length < totalQuestionsLimit) {
+    const nextIdx = mappedQuestions.length + 1;
     mappedQuestions.push({
-      id: 1,
+      id: nextIdx,
       text: "",
       options: ["", "", "", ""],
       correctOptionIdx: null,
@@ -355,6 +357,7 @@ const TestEditorWrapper = () => {
       media_url: "",
     });
   }
+
 
   return (
     <TestEditor

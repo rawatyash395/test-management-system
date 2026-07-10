@@ -31,3 +31,31 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export const isUuid = (val: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+export const getDifficultyColor = (difficulty?: string) => {
+  const diff = difficulty?.toLowerCase();
+  if (diff === "medium") return "bg-amber-500 text-white";
+  if (diff === "difficult" || diff === "hard")
+    return "bg-rose-500 text-white";
+  return "bg-[#2dd4bf] text-white"; // default/easy
+};
+
+export const formatType = (type?: string) => {
+  if (!type) return "Chapter Wise";
+  if (type === "chapterwise") return "Chapter Wise";
+  if (type === "subjectwise") return "Subject Wise";
+  if (type === "full") return "Full Test";
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+export const getStatusStyle = (status: string | null) => {
+  const s = status?.toLowerCase();
+  if (s === "active" || s === "live")
+    return "bg-emerald-50 text-emerald-700 border-emerald-100";
+  if (s === "completed") return "bg-blue-50 text-blue-700 border-blue-100";
+  return "bg-amber-50 text-amber-700 border-amber-100"; // draft
+};
+

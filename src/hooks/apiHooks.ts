@@ -227,7 +227,14 @@ export const useFetchBulkQuestions = (questionIds: string[]) => {
     queryKey: ['questions', 'bulk', ...questionIds],
     queryFn: async () => {
       const response = await apiClient.post('/questions/fetchBulk', { question_ids: questionIds });
-      return response.data.data;
+      const data: ApiQuestion[] = response.data.data;
+      // Return questions in the same order as the requested questionIds (ascending/creation order)
+      const idOrder = new Map(questionIds.map((id, i) => [id, i]));
+      return [...data].sort((a, b) => {
+        const aIdx = idOrder.has(a.id) ? idOrder.get(a.id)! : Infinity;
+        const bIdx = idOrder.has(b.id) ? idOrder.get(b.id)! : Infinity;
+        return aIdx - bIdx;
+      });
     },
     enabled: questionIds.length > 0,
   });

@@ -83,10 +83,29 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
-/* Ensure images in the editor are responsive */
+/* Ensure images in the editor are a sensible preview size */
 .rdw-editor-main img {
-  max-width: 100%;
-  height: auto;
+  max-width: 300px !important;
+  max-height: 200px !important;
+  width: auto !important;
+  height: auto !important;
   display: block;
+  border-radius: 8px;
+  margin: 4px 0;
+  object-fit: contain;
+  border: 1px solid #e2e8f0;
 }
 
+/* TestView – question HTML / explanation HTML images */
+.prose img,
+.question-html img {
+  max-width: 300px !important;
+  max-height: 200px !important;
+  width: auto !important;
+  height: auto !important;
+  display: block;
+  border-radius: 8px;
+  margin: 6px 0;
+  object-fit: contain;
+  border: 1px solid #e2e8f0;
+}

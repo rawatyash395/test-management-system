@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import MainLayout from "../../components/MainLayout";
-import { showNotification } from "../../utils/helper";
+import { Pill } from "../../components/Pill";
+import {
+  showNotification,
+  isUuid,
+  getDifficultyColor,
+  formatType,
+} from "../../utils/helper";
 import {
   useGetTest,
   useUpdateTest,
@@ -32,10 +38,6 @@ const TestPublish = () => {
 
   // Dynamic Metadata Fetching for Subject & Topics display mappings
   const { data: subjects = [] } = useSubjects();
-
-  // Find subject UUID if testData?.subject is a subject name (like "Sociology")
-  const isUuid = (val: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
   const subjectId = testData?.subject
     ? subjects.find(
@@ -138,22 +140,6 @@ const TestPublish = () => {
       )
       .join(", ") || "Application";
 
-  const getDifficultyColor = (difficulty?: string) => {
-    const diff = difficulty?.toLowerCase();
-    if (diff === "medium") return "bg-amber-500 text-white";
-    if (diff === "difficult" || diff === "hard")
-      return "bg-rose-500 text-white";
-    return "bg-[#2dd4bf] text-white"; // default/easy
-  };
-
-  const formatType = (type?: string) => {
-    if (!type) return "Chapter Wise";
-    if (type === "chapterwise") return "Chapter Wise";
-    if (type === "subjectwise") return "Subject Wise";
-    if (type === "full") return "Full Test";
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
-
   const handleConfirmPublish = async () => {
     try {
       // Update test status to 'active' on server
@@ -164,7 +150,10 @@ const TestPublish = () => {
         },
       });
 
-      queryClient.invalidateQueries({ queryKey: ["tests"] });
+      // Invalidate the tests list so the dashboard re-fetches with the new status
+      queryClient.invalidateQueries({ queryKey: ['tests'] });
+      // Also invalidate this specific test's query so test view reflects the change
+      queryClient.invalidateQueries({ queryKey: ['test', testData.id] });
       setIsSuccessModalOpen(true);
     } catch (err) {
       console.error("Publish failed:", err);
@@ -261,21 +250,14 @@ const TestPublish = () => {
                     <span className="text-gray-300">:</span>
                     <div className="flex flex-wrap gap-1">
                       {topicsDisplayName.split(",").map((t) => (
-                        <span
-                          key={t}
-                          className="bg-white text-[#fbbf24] border border-[#facc15] px-2 py-0.5 rounded text-[10px] font-bold capitalize"
-                        >
-                          {t.trim()}
-                        </span>
+                        <Pill key={t} text={t.trim()} variant="yellow" />
                       ))}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-400 w-16">Sub Topic</span>
                     <span className="text-gray-300">:</span>
-                    <span className="bg-white text-[#fbbf24] border border-[#facc15] px-2 py-0.5 rounded text-[10px] font-bold capitalize">
-                      {subTopicsDisplayName}
-                    </span>
+                    <Pill text={subTopicsDisplayName} variant="yellow" />
                   </div>
                 </div>
 
