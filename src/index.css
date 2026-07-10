@@ -83,7 +83,7 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
-/* Ensure images in the editor are a sensible preview size */
+/* Ensure images in the editor are a sensible preview size and left-aligned */
 .rdw-editor-main img {
   max-width: 300px !important;
   max-height: 200px !important;
@@ -92,8 +92,15 @@ body {
   display: block;
   border-radius: 8px;
   margin: 4px 0;
+  margin-left: 0 !important;
   object-fit: contain;
   border: 1px solid #e2e8f0;
+}
+
+/* Left-align atomic blocks (image wrapper) in the editor */
+.rdw-editor-main .rdw-atomic-block {
+  display: flex !important;
+  justify-content: flex-start !important;
 }
 
 /* TestView – question HTML / explanation HTML images */

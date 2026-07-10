@@ -704,7 +704,7 @@ const TestCreationForm = ({
         {/* Marking Scheme row: 5 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 items-end">
           {/* Wrong Answer */}
-          <div className="space-y-2 col-span-1">
+          <div className="space-y-2 col-span-1 relative pb-3">
             <label className="block text-xs font-semibold text-gray-500">
               Wrong Answer
             </label>
@@ -717,7 +717,7 @@ const TestCreationForm = ({
           </div>
 
           {/* Unattempted */}
-          <div className="space-y-2 col-span-1">
+          <div className="space-y-2 col-span-1 relative pb-3">
             <label className="block text-xs font-semibold text-gray-500">
               Unattempted
             </label>
@@ -730,7 +730,7 @@ const TestCreationForm = ({
           </div>
 
           {/* Correct Answer */}
-          <div className="space-y-2 col-span-1">
+          <div className="space-y-2 col-span-1 relative pb-3">
             <label className="block text-xs font-semibold text-gray-500">
               Correct Answer
             </label>
@@ -743,7 +743,7 @@ const TestCreationForm = ({
           </div>
 
           {/* No of Questions */}
-          <div className="space-y-2 col-span-1">
+          <div className="space-y-2 col-span-1 relative pb-3">
             <label className="block text-xs font-semibold text-gray-500">
               No of Questions
             </label>
@@ -762,14 +762,14 @@ const TestCreationForm = ({
               }`}
             />
             {validationErrors.noOfQuestions && (
-              <p className="text-red-500 text-xs font-semibold mt-1">
+              <p className="text-red-500 text-[10px] font-semibold absolute bottom-[-12px] left-0 w-full truncate leading-none">
                 {validationErrors.noOfQuestions}
               </p>
             )}
           </div>
 
           {/* Total Marks (auto-calculated) */}
-          <div className="space-y-2 col-span-1">
+          <div className="space-y-2 col-span-1 relative pb-3">
             <label className="block text-xs font-semibold text-gray-500">
               Total Marks
             </label>
@@ -785,7 +785,7 @@ const TestCreationForm = ({
               }`}
             />
             {validationErrors.totalMarks && (
-              <p className="text-red-500 text-xs font-semibold mt-1">
+              <p className="text-red-500 text-[10px] font-semibold absolute bottom-[-12px] left-0 w-full truncate leading-none">
                 {validationErrors.totalMarks}
               </p>
             )}
