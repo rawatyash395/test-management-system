@@ -92,11 +92,7 @@ Create a `.env` file in the root directory (based on `.env.example`):
 cp .env.example .env
 ```
 
-And configure the backend API base URL:
-
-```env
-VITE_API_URL=https://admin-moderator-backend-staging.up.railway.app/api
-```
+And configure the backend API base URL
 
 ### 4. Running the Development Server
 
